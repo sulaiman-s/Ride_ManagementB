@@ -12,7 +12,10 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 
 from pathlib import Path
 import os
-
+import dj_database_url
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -20,16 +23,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-6ra5r#ut8y&_$a$duo*$-pvon#xy2%%5m==4urwfcdf1qb*zq='
-
+KEY = 'django-insecure-6ra5r#ut8y&_$a$duo*$-pvon#xy2%%5m==4urwfcdf1qb*zq='
+SECRET_KEY = os.environ.get('SECRET_KEY', default=KEY)
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = int(os.environ.get('DEBUG', default=1))
 
 ALLOWED_HOSTS = [
     '127.0.0.1',
-    '192.168.2.103',
+    '192.168.2.104',
+    'ridemanagement.herokuapp.com'
 ]
-
+CSRF_TRUSTED_ORIGINS = ['https://ridemanagement.herokuapp.com']
 # Application definition
 
 INSTALLED_APPS = [
@@ -39,15 +43,18 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'cloudinary',
     'myauth',
     'rest_framework',
     'djoser',
     'driver',
-    'person'
+    'person',
+    'Notifications'
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -87,7 +94,7 @@ SIMPLE_JWT = {
 }
 DJOSER = {
     'SERIALIZERS': {
-         'user_create': 'myauth.serializer.UserRegistrationSerializer'
+        'user_create': 'myauth.serializer.UserRegistrationSerializer'
     }
 }
 # Database
@@ -100,6 +107,10 @@ DATABASES = {
     }
 }
 
+DATABASE_URL = os.environ.get('DATABASE_URL')
+db_from_env = dj_database_url.config(
+    default=DATABASE_URL, conn_max_age=500, ssl_require=True)
+DATABASES['default'].update(db_from_env)
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
 
@@ -118,6 +129,13 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'sulaimanfarooqi526@gmail.com'
+EMAIL_HOST_PASSWORD = 'xmxioayrmwppxzlg'
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
 
@@ -132,8 +150,16 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
+CLOUDINARY_STORAGE = {
+    "CLOUD_NAME": "mansoorcloud",
+    "API_KEY": "475838235114589",
+    "API_SECRET": "VqT5klF59dCMOLr58Xsnk2syymk"
+}
+
+
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = Path.joinpath(BASE_DIR, 'media')

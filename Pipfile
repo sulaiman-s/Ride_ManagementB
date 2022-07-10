@@ -9,6 +9,10 @@ djangorestframework = "*"
 djoser = "*"
 djangorestframework-simplejwt = "*"
 pillow = "*"
+cloudinary = "*"
+django-cloudinary-storage = "*"
+dj-database-url = "*"
+whitenoise = "*"
 
 [dev-packages]
 
